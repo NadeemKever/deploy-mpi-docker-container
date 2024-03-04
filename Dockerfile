@@ -1,5 +1,5 @@
 ## Dockerfile that builds MPICH to run MPI parallel programs
-## Build with OSU benchmarks (if desired) for profiling HPC systems
+## Can build with OSU benchmarks ( uncomment section if desired ) for profiling HPC systems
 ## Add a simple MPI script and compile
 
 
