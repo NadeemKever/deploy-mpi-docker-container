@@ -1,37 +1,64 @@
-name: Build and push MPI image to AWS ECR
+name: Build and push MPI image to AWS ECR and build simple GitHub.io page with Pandoc
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build-and-push:
-    name: Build and push to ECR
+  deploy:
+    name: Build GitHub.io page
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v2
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-1
-
-      - name: Login to AWS ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build, tag, and push image to AWS ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: mpi-docker-container
-          IMAGE_TAG: latest
+      - name: Prepare build environment
         run: |
-            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          mkdir -p build
+          touch build/.nojekyll
+
+      - name: Run pandoc
+        uses: docker://pandoc/core:3.1.1
+        with:
+          args: >-
+            --standalone
+            --output=build/index.html
+            README.md
+
+      - name: Deploy on github pages
+        uses: JamesIves/github-pages-deploy-action@4.1.0
+        with:
+          branch: gh-pages
+          folder: build
+
+
+  # build-and-push:
+  #   name: Build and push to ECR 
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v2
+
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: us-west-1
+
+  #     - name: Login to AWS ECR
+  #       id: login-ecr
+  #       uses: aws-actions/amazon-ecr-login@v1
+
+  #     - name: Build, tag, and push image to AWS ECR
+  #       id: build-image
+  #       env:
+  #         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #         ECR_REPOSITORY: mpi-docker-container
+  #         IMAGE_TAG: latest
+  #       run: |
+  #           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+  #           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
 
           
