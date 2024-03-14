@@ -16,7 +16,7 @@ jobs:
       - name: Prepare build environment
         run: |
           mkdir -p build
-          touch build/.nojekyll
+#          touch build/.nojekyll
 
       - name: Run pandoc
         uses: docker://pandoc/core:2.9
