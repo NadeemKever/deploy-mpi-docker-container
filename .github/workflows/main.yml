@@ -7,27 +7,30 @@ on:
 
 jobs:
   deploy:
-      runs-on: ubuntu-latest
-      steps:
-          - name: checkout
-            uses: actions/checkout@v2
-          - name: prepare
-            run: |
-              mkdir -p build
-              touch build/.nojekyll
-          - name: pandoc
-            uses: docker://pandoc/core:2.12
-            with:
-              args: >-
-                --standalone
-                --output=build/index.html
-                --metadata title="Hello, Pandoc"
-                README.md
-          - name: deploy
-            uses: JamesIves/github-pages-deploy-action@4.1.0
-            with:
-              branch: gh-pages
-              folder: build
+    name: Build GitHub.io page
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: Prepare build environment
+        run: |
+          mkdir -p build
+          touch build/.nojekyll
+
+      - name: Run pandoc
+        uses: docker://pandoc/core:2.9
+        with:
+          args: >-
+            --standalone
+            --output=build/index.html
+            README.md
+
+      - name: Deploy on github pages
+        uses: JamesIves/github-pages-deploy-action@4
+        with:
+          branch: gh-pages
+          folder: build
 
 
   # build-and-push:
